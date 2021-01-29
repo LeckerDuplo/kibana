@@ -57,11 +57,23 @@ export const buildPhrasesFilter = (
   const value = params.map((v: any) => format(field, v)).join(', ');
 
   let should;
-  if (field.scripted) {
+if (field.scripted) {
     should = params.map((v: any) => ({
       script: getPhraseScript(field, v),
     }));
-  } else {
+  }
+  
+  // Build query differently if the index pattern is type of rollup
+    if(indexPattern.type == 'rollup'){
+     
+      should = params.map((v: any) => ({
+        term: {
+          [field.name]: v,
+        },
+      }));
+    }
+ 
+  else {
     should = params.map((v: any) => ({
       match_phrase: {
         [field.name]: v,
